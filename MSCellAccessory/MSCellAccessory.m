@@ -246,24 +246,34 @@
     UITableViewController *superController = NULL;
     UITableViewCell *superTableViewCell = NULL;
     NSIndexPath *indexPath = NULL;
-    //iOS7 above
-    if([NSClassFromString(@"UIMotionEffect") class])
+    
+    UIView* view = self.superview;
+    // Find the UITableView predecessor. Due to ios7 wrappers
+    while (![view isKindOfClass:[UITableView class]])
     {
-        superTableView = (UITableView *)self.superview.superview.superview.superview;
-        superController = (UITableViewController *)superTableView.firstAvailableUIViewController;
-        superTableViewCell = (UITableViewCell *)self.superview.superview;
-        indexPath = [superTableView indexPathForCell:superTableViewCell];
-    }
-    //iOS5, iOS6
-    else
-    {
-        superTableView = (UITableView *)self.superview.superview;
-        superController = (UITableViewController *)superTableView.firstAvailableUIViewController;
-        superTableViewCell = (UITableViewCell *)self.superview;
-        indexPath = [superTableView indexPathForCell:superTableViewCell];
+        view = [view superview];
     }
     
-    [superController tableView:superTableView accessoryButtonTappedForRowWithIndexPath:indexPath];
+    if ((view != nil) && ([view isKindOfClass:[UITableView class]]))
+    {
+        superTableView = (UITableView*)view;
+
+        //iOS7 above
+        if([NSClassFromString(@"UIMotionEffect") class])
+        {
+            superTableViewCell = (UITableViewCell *)self.superview.superview;
+        }
+        //iOS5, iOS6
+        else
+        {
+            superTableViewCell = (UITableViewCell *)self.superview;
+        }
+
+        indexPath = [superTableView indexPathForCell:superTableViewCell];
+
+        superController = (UITableViewController *)superTableView.firstAvailableUIViewController;
+        [superController tableView:superTableView accessoryButtonTappedForRowWithIndexPath:indexPath];
+    }
 }
 
 - (void)drawRect:(CGRect)rect
